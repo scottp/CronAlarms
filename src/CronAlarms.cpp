@@ -164,7 +164,6 @@ void CronClass::serviceAlarms()
     isServicing = true;
     for (servicedCronId = 0; servicedCronId < dtNBR_ALARMS; servicedCronId++) {
       if (Alarm[servicedCronId].isEnabled && (time(nullptr) >= Alarm[servicedCronId].nextTrigger)) {
-        // XXX Can't be trivial copied like this....
         CronEvent_function TickHandler = Alarm[servicedCronId].onTickHandler;
         if (Alarm[servicedCronId].isOneShot) {
           free(servicedCronId);  // free the ID if mode is OnShot
@@ -172,8 +171,7 @@ void CronClass::serviceAlarms()
           Alarm[servicedCronId].updateNextTrigger();
         }
         if (TickHandler) {
-          Serial.printf("Triggered callback for ID=%d\n", servicedCronId);
-          // TickHandler(servicedCronId);     // call the handler
+          TickHandler(servicedCronId);
         }
       }
     }
@@ -219,7 +217,7 @@ char* CronClass::futureSeconds(uint32_t seconds) {
 CronID_t CronClass::create(char * cronstring, OnTick_t onTickHandler_C, bool isOneShot)
 {
   OnTick_t localHandler = onTickHandler_C;
-  return create(cronstring, [&](CronID_t id) {(*localHandler)();}, isOneShot);
+  return create(cronstring, [=](CronID_t id) {localHandler();}, isOneShot);
 }
 
 CronID_t CronClass::create(uint32_t seconds, CronEvent_function onTickHandler, bool isOneShot)
