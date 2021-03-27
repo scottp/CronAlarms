@@ -63,7 +63,8 @@ public:
   // Function to create alarms and timers with cron
   CronID_t create(char * cronstring, OnTick_t onTickHandler, bool isOneShot = false);
   CronID_t create(char * cronstring, CronEvent_function onTickHandler, bool isOneShot = false);
-  CronID_t create(uint32_t seconds, CronEvent_function onTickHandler, bool isOneShot = false);
+  CronID_t create(uint32_t seconds, OnTick_t onTickHandler, bool isOneShot = true);
+  CronID_t create(uint32_t seconds, CronEvent_function onTickHandler, bool isOneShot = true);
   // isOneShot - trigger once at the given time in the future
 
   // Function that must be evaluated often (at least once every main loop)

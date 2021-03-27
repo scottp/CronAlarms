@@ -220,6 +220,12 @@ CronID_t CronClass::create(char * cronstring, OnTick_t onTickHandler_C, bool isO
   return create(cronstring, [=](CronID_t id) {localHandler();}, isOneShot);
 }
 
+CronID_t CronClass::create(uint32_t seconds, OnTick_t onTickHandler_C, bool isOneShot)
+{
+  OnTick_t localHandler = onTickHandler_C;
+  return create(futureSeconds(seconds), [=](CronID_t id) {localHandler();}, isOneShot);
+}
+
 CronID_t CronClass::create(uint32_t seconds, CronEvent_function onTickHandler, bool isOneShot)
 {
   return create(futureSeconds(seconds), onTickHandler, isOneShot);
