@@ -1,3 +1,8 @@
+NOTE:
+  This version is forked from: https://github.com/Martin-Laclaustra/CronAlarms
+  It is experimental adding some features and will eventually become a merge request.
+  I don't recommend using this version. Scott 2021-03-28
+
 CronAlarms
 ==========
 Using expressions suitable for the program cron (crontab syntax), the library allows performing tasks at specific times or after specific intervals.
@@ -54,7 +59,7 @@ You can also set specific dates and times within a year, i.e. noon of 4th July.
 
 Other low level functions:
 - disable( ID);  -  prevent the alarm associated with the given ID from triggering   
-- enable(ID);  -  enable the alarm 
+- enable(ID);  -  enable the alarm
 - getTriggeredAlarmId();   -  returns the currently triggered  alarm id, only valid in an alarm callback
 
 - globalUpdateNextTrigger(), globalenable(), and globaldisable() - can be used to temporarily suspend activity during timesetting or time zone change
@@ -74,7 +79,7 @@ You can call Cron.delay() if you need to service the scheduler without a delay.
 
 _Q: Are there any restrictions on the code in a task handler function?_
 
-A: No. The scheduler does not use interrupts so your task handling function is no different from other functions you create in your sketch. 
+A: No. The scheduler does not use interrupts so your task handling function is no different from other functions you create in your sketch.
 
 _Q: What are the intervals that can be scheduled?_
 
@@ -100,4 +105,3 @@ The number of alarms can be changed in the CronAlarms header file (set by the co
 onceOnly Alarms are freed when they are triggered so another onceOnly alarm can be set to trigger again.
 
 There is no limit to the number of times a onceOnly alarm can be reset.
-

@@ -165,14 +165,14 @@ void CronClass::serviceAlarms()
     isServicing = true;
     for (servicedCronId = 0; servicedCronId < dtNBR_ALARMS; servicedCronId++) {
       if (Alarm[servicedCronId].isEnabled && (time(nullptr) >= Alarm[servicedCronId].nextTrigger)) {
-        OnTick_t TickHandler = Alarm[servicedCronId].onTickHandler;
+        CronEvent_function TickHandler = Alarm[servicedCronId].onTickHandler;
         if (Alarm[servicedCronId].isOneShot) {
           free(servicedCronId);  // free the ID if mode is OnShot
         } else {
           Alarm[servicedCronId].updateNextTrigger();
         }
-        if (TickHandler != NULL) {
-          (*TickHandler)();     // call the handler
+        if (TickHandler) {
+          TickHandler(servicedCronId);     // call the handler
         }
       }
     }
@@ -207,8 +207,27 @@ time_t CronClass::getNextTrigger(CronID_t ID) const
   }
 }
 
+char* CronClass::futureSeconds(uint32_t seconds) {
+  struct tm timeinfo;
+  time_t timecalc = time(nullptr) + seconds;
+  localtime_r(&timecalc, &timeinfo);
+  strftime(cronstring_buf, sizeof(cronstring_buf), "%S %M %H %d %m *", &timeinfo);
+  return cronstring_buf;
+}
+
+CronID_t CronClass::create(char * cronstring, OnTick_t onTickHandler_C, bool isOneShot)
+{
+  OnTick_t localHandler = onTickHandler_C;
+  return create(cronstring, [&](CronID_t id) {(*localHandler)();}, isOneShot);
+}
+
+CronID_t CronClass::create(uint32_t seconds, CronEvent_function onTickHandler, bool isOneShot)
+{
+  return create(futureSeconds(seconds), onTickHandler, isOneShot);
+}
+
 // attempt to create a cron alarm and return CronID if successful
-CronID_t CronClass::create(const char * cronstring, OnTick_t onTickHandler, bool isOneShot)
+CronID_t CronClass::create(char * cronstring, CronEvent_function onTickHandler, bool isOneShot)
 {
   for (uint8_t id = 0; id < dtNBR_ALARMS; id++) {
     if (!isAllocated(id)) {

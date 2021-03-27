@@ -4,7 +4,7 @@
 #define CronAlarms_h
 
 #include <Arduino.h>
-#include <time.h> 
+#include <time.h>
 
 extern "C" {
 #include "ccronexpr/ccronexpr.h"
@@ -28,7 +28,9 @@ typedef CronID_t CronId;  // Arduino friendly name
 #define dtINVALID_ALARM_ID 255
 #define dtINVALID_TIME     (time_t)(-1)
 
-typedef void (*OnTick_t)();  // alarm callback function typedef
+#include <functional>
+typedef void (*OnTick_t)();  // alarm callback function typedef (TODO: Namespace, e.g. same as other Alarm and Schedulers)
+typedef std::function<void(CronID_t id)> CronEvent_function;
 
 // class defining an alarm instance, only used by dtAlarmsClass
 class CronEventClass
@@ -37,7 +39,7 @@ public:
   CronEventClass();
   void updateNextTrigger(bool forced=false);
   cron_expr expr;
-  OnTick_t onTickHandler;
+  CronEvent_function onTickHandler;
   time_t nextTrigger;
   bool isEnabled;  // the timer is only actioned if isEnabled is true
   bool isOneShot;  // the timer will be de-allocated after trigger is processed
@@ -52,12 +54,16 @@ private:
   uint8_t servicedCronId; // the alarm currently being serviced
   bool globalEnabled = true;
   void serviceAlarms();
+  char cronstring_buf[20];  // TODO - check size
+  char* futureSeconds(uint32_t seconds);
 
 public:
   CronClass();
 
   // Function to create alarms and timers with cron
-  CronID_t create(const char * cronstring, OnTick_t onTickHandler, bool isOneShot);
+  CronID_t create(char * cronstring, OnTick_t onTickHandler, bool isOneShot = false);
+  CronID_t create(char * cronstring, CronEvent_function onTickHandler, bool isOneShot = false);
+  CronID_t create(uint32_t seconds, CronEvent_function onTickHandler, bool isOneShot = false);
   // isOneShot - trigger once at the given time in the future
 
   // Function that must be evaluated often (at least once every main loop)
