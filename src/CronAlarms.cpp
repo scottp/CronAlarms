@@ -29,14 +29,13 @@ extern "C" {
 #include "ccronexpr/ccronexpr.h"
 }
 
-
 //**************************************************************
 //* Cron Event Class Constructor
 
 CronEventClass::CronEventClass()
 {
   memset(&expr, 0, sizeof(expr));
-  onTickHandler = NULL;  // prevent a callback until this pointer is explicitly set
+  onTickHandler = nullptr;  // prevent a callback until this pointer is explicitly set
   nextTrigger = 0;
   isEnabled = isOneShot = false;
 }
@@ -49,7 +48,7 @@ void CronEventClass::updateNextTrigger(bool forced)
 {
   if (isEnabled) {
     time_t timenow = time(nullptr);
-    if (onTickHandler != NULL && ((nextTrigger <= timenow) || forced)) {
+    if (onTickHandler && ((nextTrigger <= timenow) || forced)) {
       // update alarm if next trigger is not yet in the future
       nextTrigger = cron_next(&expr, timenow);
     }
@@ -106,7 +105,7 @@ void CronClass::free(CronID_t ID)
 {
   if (isAllocated(ID)) {
     memset(&(Alarm[ID].expr), 0, sizeof(Alarm[ID].expr));
-    Alarm[ID].onTickHandler = NULL;
+    Alarm[ID].onTickHandler = nullptr;
     Alarm[ID].nextTrigger = 0;
     Alarm[ID].isEnabled = false;
     Alarm[ID].isOneShot = false;
@@ -126,7 +125,7 @@ uint8_t CronClass::count() const
 // returns true if this id is allocated
 bool CronClass::isAllocated(CronID_t ID) const
 {
-  return (ID < dtNBR_ALARMS && Alarm[ID].onTickHandler != NULL);
+  return (ID < dtNBR_ALARMS && Alarm[ID].onTickHandler);
 }
 
 // returns the currently triggered alarm id
@@ -165,6 +164,7 @@ void CronClass::serviceAlarms()
     isServicing = true;
     for (servicedCronId = 0; servicedCronId < dtNBR_ALARMS; servicedCronId++) {
       if (Alarm[servicedCronId].isEnabled && (time(nullptr) >= Alarm[servicedCronId].nextTrigger)) {
+        // XXX Can't be trivial copied like this....
         CronEvent_function TickHandler = Alarm[servicedCronId].onTickHandler;
         if (Alarm[servicedCronId].isOneShot) {
           free(servicedCronId);  // free the ID if mode is OnShot
@@ -172,7 +172,8 @@ void CronClass::serviceAlarms()
           Alarm[servicedCronId].updateNextTrigger();
         }
         if (TickHandler) {
-          TickHandler(servicedCronId);     // call the handler
+          Serial.printf("Triggered callback for ID=%d\n", servicedCronId);
+          // TickHandler(servicedCronId);     // call the handler
         }
       }
     }
