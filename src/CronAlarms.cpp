@@ -214,7 +214,7 @@ char* CronClass::futureSeconds(uint32_t seconds) {
   return cronstring_buf;
 }
 
-CronID_t CronClass::create(char * cronstring, OnTick_t onTickHandler_C, bool isOneShot)
+CronID_t CronClass::create(const char * cronstring, OnTick_t onTickHandler_C, bool isOneShot)
 {
   OnTick_t localHandler = onTickHandler_C;
   return create(cronstring, [=](CronID_t id) {localHandler();}, isOneShot);
@@ -232,7 +232,7 @@ CronID_t CronClass::create(uint32_t seconds, CronEvent_function onTickHandler, b
 }
 
 // attempt to create a cron alarm and return CronID if successful
-CronID_t CronClass::create(char * cronstring, CronEvent_function onTickHandler, bool isOneShot)
+CronID_t CronClass::create(const char * cronstring, CronEvent_function onTickHandler, bool isOneShot)
 {
   for (uint8_t id = 0; id < dtNBR_ALARMS; id++) {
     if (!isAllocated(id)) {
